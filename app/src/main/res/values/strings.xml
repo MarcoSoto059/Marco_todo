@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Marco_todo</string>
+    <string name="video_status_playing">Reproduciendo</string>
+    <string name="video_status_paused">Pausado</string>
+    <string name="video_status_loading">Cargando video&#8230;</string>
+    <string name="video_status_completed">Completado</string>
+    <string name="video_status_error">Error en el video</string>
+</resources>
