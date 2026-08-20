@@ -48,14 +48,13 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 
+import com.example.marco_todo.ui.components.BaseScreen
+
 @Composable
 fun MaterialDesignApp(onGoHomeScreen: () -> Unit) {
-    Marco_todoTheme {
-        MaterialWidgetsScreen(onGoHomeScreen)
-    }
+    MaterialWidgetsScreen(onGoHomeScreen)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaterialWidgetsScreen(onGoHomeScreen: () -> Unit) {
 
@@ -74,18 +73,9 @@ fun MaterialWidgetsScreen(onGoHomeScreen: () -> Unit) {
         mutableStateOf("Aquí aparecerán los datos del perfil.")
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Perfil Material") },
-                navigationIcon = {
-                    IconButton(onClick = onGoHomeScreen) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        },
-        modifier = Modifier.fillMaxSize(),
+    BaseScreen(
+        title = "Interoperabilidad Material",
+        onBack = onGoHomeScreen
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -95,13 +85,20 @@ fun MaterialWidgetsScreen(onGoHomeScreen: () -> Unit) {
                 .padding(20.dp)
         ) {
             Text(
-                text = "Material Profile",
-                style = MaterialTheme.typography.headlineMedium
+                text = "Perfil con Android Views",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "Integración de componentes clásicos en Compose",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
 
             TarjetaInformacion()
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             CampoMaterial(
                 titulo = "Nombre",

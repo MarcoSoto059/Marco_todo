@@ -2,7 +2,7 @@ package com.example.marco_todo.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,6 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.util.*
+
+import com.example.marco_todo.ui.components.BaseScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,17 +30,9 @@ fun FechaYHoraScreen(onGoBack: () -> Unit) {
     var fechaSeleccionada by remember { mutableStateOf("Ninguna fecha seleccionada") }
     var horaSeleccionada by remember { mutableStateOf("Ninguna hora seleccionada") }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Fecha y Hora", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onGoBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
+    BaseScreen(
+        title = "Fecha y Hora",
+        onBack = onGoBack
     ) { padding ->
         Column(
             modifier = Modifier
@@ -46,38 +40,74 @@ fun FechaYHoraScreen(onGoBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
+            Text(
+                text = "Configuración Temporal",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Selecciona los parámetros de tiempo",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Text(text = "Resultados:", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Selección Actual:", 
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Event, null, tint = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.width(8.dp))
+                        Text(text = fechaSeleccionada, style = MaterialTheme.typography.bodyLarge)
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = fechaSeleccionada, style = MaterialTheme.typography.bodyLarge)
-                    Text(text = horaSeleccionada, style = MaterialTheme.typography.bodyLarge)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.AccessTime, null, tint = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.width(8.dp))
+                        Text(text = horaSeleccionada, style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = { showDatePicker = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Seleccionar Fecha")
+                Icon(Icons.Default.CalendarToday, null)
+                Spacer(Modifier.width(8.dp))
+                Text("SELECCIONAR FECHA")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = { showTimePicker = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Seleccionar Hora")
+                Icon(Icons.Default.Schedule, null)
+                Spacer(Modifier.width(8.dp))
+                Text("SELECCIONAR HORA")
             }
 
             if (showDatePicker) {

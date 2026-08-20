@@ -60,6 +60,11 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
 
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.common)
+
     implementation("androidx.fragment:fragment-ktx:1.8.2")
 
     testImplementation(libs.junit)

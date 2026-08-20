@@ -1,21 +1,19 @@
 package com.example.marco_todo.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import com.example.marco_todo.ui.components.BaseScreen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectionScreen(
-    onGoHomeScreen: () -> Unit
-) {
+fun SelectionScreen(onGoHomeScreen: () -> Unit) {
     var musicaChecked by remember { mutableStateOf(false) }
     var deportesChecked by remember { mutableStateOf(false) }
     var tecnologiaChecked by remember { mutableStateOf(false) }
@@ -30,89 +28,84 @@ fun SelectionScreen(
     var javaSelected by remember { mutableStateOf(false) }
 
     var resultado by remember { mutableStateOf("") }
-
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Selección de Usuario") },
-                navigationIcon = {
-                    IconButton(onClick = onGoHomeScreen) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
-                    }
-                }
-            )
-        }
+    BaseScreen(
+        title = "Componentes de Selección",
+        onBack = onGoHomeScreen
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(20.dp)
                 .fillMaxSize()
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text("Intereses", style = MaterialTheme.typography.titleMedium)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = musicaChecked, onCheckedChange = { musicaChecked = it })
-                Text("Música")
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = deportesChecked, onCheckedChange = { deportesChecked = it })
-                Text("Deportes")
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = tecnologiaChecked, onCheckedChange = { tecnologiaChecked = it })
-                Text("Tecnología")
-            }
-
-            HorizontalDivider()
-
-            Text("Contenido", style = MaterialTheme.typography.titleMedium)
-            opcionesContenido.forEach { opcion ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = (opcion == selectedContenido),
-                        onClick = { selectedContenido = opcion }
-                    )
-                    Text(opcion)
+            // Checkboxes Section
+            SelectionSection(title = "Intereses (Checkboxes)") {
+                Column {
+                    SelectionRow(label = "Música", checked = musicaChecked) { musicaChecked = it }
+                    SelectionRow(label = "Deportes", checked = deportesChecked) { deportesChecked = it }
+                    SelectionRow(label = "Tecnología", checked = tecnologiaChecked) { tecnologiaChecked = it }
                 }
             }
 
-            HorizontalDivider()
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Notificaciones", style = MaterialTheme.typography.titleMedium)
-                Switch(checked = notificacionesEnabled, onCheckedChange = { notificacionesEnabled = it })
+            // RadioButtons Section
+            SelectionSection(title = "Contenido Preferido (RadioButtons)") {
+                Column {
+                    opcionesContenido.forEach { opcion ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedContenido = opcion }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            RadioButton(
+                                selected = (opcion == selectedContenido),
+                                onClick = { selectedContenido = opcion }
+                            )
+                            Text(opcion, style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
             }
 
-            HorizontalDivider()
+            // Switch Section
+            SelectionSection(title = "Configuración (Switch)") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Activar Notificaciones", style = MaterialTheme.typography.bodyLarge)
+                    Switch(checked = notificacionesEnabled, onCheckedChange = { notificacionesEnabled = it })
+                }
+            }
 
-            Text("Categorías", style = MaterialTheme.typography.titleMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                FilterChip(
-                    selected = androidSelected,
-                    onClick = { androidSelected = !androidSelected },
-                    label = { Text("Android") }
-                )
-                FilterChip(
-                    selected = kotlinSelected,
-                    onClick = { kotlinSelected = !kotlinSelected },
-                    label = { Text("Kotlin") }
-                )
-                FilterChip(
-                    selected = javaSelected,
-                    onClick = { javaSelected = !javaSelected },
-                    label = { Text("Java") }
-                )
+            // Chips Section
+            SelectionSection(title = "Habilidades (FilterChips)") {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    FilterChip(
+                        selected = androidSelected,
+                        onClick = { androidSelected = !androidSelected },
+                        label = { Text("Android") }
+                    )
+                    FilterChip(
+                        selected = kotlinSelected,
+                        onClick = { kotlinSelected = !kotlinSelected },
+                        label = { Text("Kotlin") }
+                    )
+                    FilterChip(
+                        selected = javaSelected,
+                        onClick = { javaSelected = !javaSelected },
+                        label = { Text("Java") }
+                    )
+                }
             }
 
             Button(
@@ -127,35 +120,71 @@ fun SelectionScreen(
                     if (kotlinSelected) categorias.add("Kotlin")
                     if (javaSelected) categorias.add("Java")
 
-                    val interesesTexto = if (intereses.isEmpty()) "Ninguno" else intereses.joinToString(", ")
-                    val categoriasTexto = if (categorias.isEmpty()) "Ninguna" else categorias.joinToString(", ")
-
                     resultado = """
-                        SELECCIÓN DEL USUARIO
-                        
-                        Intereses: $interesesTexto
-                        Contenido: $selectedContenido
-                        Notificaciones: ${if (notificacionesEnabled) "Activadas" else "Desactivadas"}
-                        Categorías: $categoriasTexto
+                        Preferencias Guardadas:
+                        - Intereses: ${if (intereses.isEmpty()) "Ninguno" else intereses.joinToString(", ")}
+                        - Contenido: $selectedContenido
+                        - Notificaciones: ${if (notificacionesEnabled) "Sí" else "No"}
+                        - Habilidades: ${if (categorias.isEmpty()) "Ninguna" else categorias.joinToString(", ")}
                     """.trimIndent()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
             ) {
-                Text("Guardar")
+                Text("PROCESAR SELECCIÓN")
             }
 
             if (resultado.isNotEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    ),
+                    shape = MaterialTheme.shapes.medium
                 ) {
-                    Text(
-                        text = resultado,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "RESUMEN DE SELECCIÓN",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = resultado,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SelectionSection(title: String, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        content()
+        HorizontalDivider(modifier = Modifier.padding(top = 8.dp).alpha(0.5f))
+    }
+}
+
+@Composable
+fun SelectionRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 4.dp)
+    ) {
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }

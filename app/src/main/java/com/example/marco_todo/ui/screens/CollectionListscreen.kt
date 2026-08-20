@@ -13,17 +13,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import com.example.marco_todo.data.repository.LocalRepository
+import com.example.marco_todo.ui.components.BaseScreen
 
 @Composable
 fun CollectionListScreen(onGoHomeScreen: () -> Unit) {
@@ -39,28 +45,19 @@ fun CollectionListScreen(onGoHomeScreen: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DemoSelector(onSelect: (String) -> Unit, onGoHomeScreen: () -> Unit) {
     val demos = listOf(
-        Triple("ListView", "Lista tradicional.", "listView"),
-        Triple("RecyclerView", "Lista moderna y eficiente.", "recyclerView"),
-        Triple("GridView", "Muestra elementos en cuadrícula.", "gridView"),
-        Triple("Spinner", "Lista desplegable.", "spinner"),
-        Triple("ExpandableListView", "Lista jerárquica.", "expandableListView")
+        Triple("ListView", "Lista tradicional en una columna.", "listView"),
+        Triple("RecyclerView", "Lista eficiente con búsqueda.", "recyclerView"),
+        Triple("GridView", "Distribución en cuadrícula.", "gridView"),
+        Triple("Spinner", "Selector compacto desplegable.", "spinner"),
+        Triple("Expandable", "Lista con secciones expandibles.", "expandableListView")
     )
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Listas y Colecciones", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onGoHomeScreen) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
+    BaseScreen(
+        title = "Listas y Colecciones",
+        onBack = onGoHomeScreen
     ) { padding ->
         Column(
             modifier = Modifier
@@ -68,23 +65,25 @@ private fun DemoSelector(onSelect: (String) -> Unit, onGoHomeScreen: () -> Unit)
                 .padding(padding)
         ) {
             Text(
-                text = "Selecciona un ejemplo para explorar",
-                color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.bodyLarge
+                text = "Explora diferentes tipos de listas",
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(demos) { index, (title, description, key) ->
                     Card(
                         onClick = { onSelect(key) },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        shape = MaterialTheme.shapes.medium,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
                     ) {
                         Row(
                             modifier = Modifier
@@ -96,33 +95,41 @@ private fun DemoSelector(onSelect: (String) -> Unit, onGoHomeScreen: () -> Unit)
                                 modifier = Modifier
                                     .size(48.dp)
                                     .background(
-                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        color = MaterialTheme.colorScheme.primary,
                                         shape = CircleShape
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "${index + 1}",
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontSize = 18.sp
+                                Icon(
+                                    imageVector = when(key) {
+                                        "listView" -> Icons.AutoMirrored.Filled.List
+                                        "recyclerView" -> Icons.Default.Search
+                                        "gridView" -> Icons.Default.GridView
+                                        "spinner" -> Icons.Default.ArrowDropDownCircle
+                                        else -> Icons.Default.Expand
+                                    },
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
+                            
                             Spacer(modifier = Modifier.width(16.dp))
+                            
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = title,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                                    fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = description,
-                                    fontSize = 13.sp,
-                                    color = Color.Gray
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+                            
                             Icon(
-                                Icons.Default.ChevronRight,
+                                imageVector = Icons.Default.ChevronRight,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -136,29 +143,20 @@ private fun DemoSelector(onSelect: (String) -> Unit, onGoHomeScreen: () -> Unit)
 
 // funciones de las listas
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DemoLazyColumnBasico(onBack: () -> Unit) {
     var texto by remember { mutableStateOf("") }
-    val items = remember { mutableStateListOf("Kotlin", "Java", "Python", "JavaScript", "Swift") }
+    val items = LocalRepository.items
     var editIndex by remember { mutableIntStateOf(-1) }
     var editText by remember { mutableStateOf("") }
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableIntStateOf(-1) }
     val snackHostState = remember { SnackbarHostState() }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("ListView", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
-                    }
-                }
-            )
-        }
+    BaseScreen(
+        title = "ListView (LazyColumn)",
+        onBack = onBack,
+        snackbarHost = { SnackbarHost(snackHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -167,9 +165,9 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Manipulacion de listas: agregar, editar y eliminar",
+                text = "Información Local Persistente (Sesión)",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.secondary
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -183,13 +181,13 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
                     label = { Text("Nuevo elemento") },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = MaterialTheme.shapes.medium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 FilledTonalButton(
                     onClick = {
                         if (texto.isNotBlank()) {
-                            items.add(0, texto.trim())
+                            LocalRepository.addItem(texto.trim(), "Elemento agregado localmente")
                             texto = ""
                         }
                     }
@@ -211,7 +209,7 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
                     color = Color(0xFF1A237E)
                 )
                 if (items.isNotEmpty()) {
-                    TextButton(onClick = { items.clear() }) {
+                    TextButton(onClick = { LocalRepository.clearAll() }) {
                         Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Limpiar todo")
@@ -275,18 +273,18 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
-                                    text = item,
+                                    text = item.title,
                                     modifier = Modifier.weight(1f),
                                     fontSize = 16.sp
                                 )
                                 IconButton(onClick = {
-                                    editIndex = index
-                                    editText = item
+                                    editIndex = item.id
+                                    editText = item.title
                                     showEditDialog = true
                                 }) {
                                     Icon(Icons.Default.Edit, "Editar", tint = Color(0xFF1565C0))
                                 }
-                                IconButton(onClick = { showDeleteDialog = index }) {
+                                IconButton(onClick = { showDeleteDialog = item.id }) {
                                     Icon(Icons.Default.Delete, "Eliminar", tint = Color(0xFFD32F2F))
                                 }
                             }
@@ -311,8 +309,8 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
             },
             confirmButton = {
                 TextButton(onClick = {
-                    if (editText.isNotBlank() && editIndex in items.indices) {
-                        items[editIndex] = editText.trim()
+                    if (editText.isNotBlank()) {
+                        LocalRepository.updateItem(editIndex, editText.trim(), "Actualizado")
                         showEditDialog = false
                     }
                 }) { Text("Guardar") }
@@ -324,14 +322,15 @@ private fun DemoLazyColumnBasico(onBack: () -> Unit) {
     }
 
     if (showDeleteDialog >= 0) {
-        val idx = showDeleteDialog
+        val itemId = showDeleteDialog
+        val itemToDelete = items.find { it.id == itemId }
         AlertDialog(
             onDismissRequest = { showDeleteDialog = -1 },
             title = { Text("Eliminar elemento") },
-            text = { Text("Deseas eliminar '${items[idx]}'?") },
+            text = { Text("Deseas eliminar '${itemToDelete?.title}'?") },
             confirmButton = {
                 TextButton(onClick = {
-                    items.removeAt(idx)
+                    LocalRepository.removeItem(itemId)
                     showDeleteDialog = -1
                 }) { Text("Eliminar", color = Color.Red) }
             },
@@ -367,17 +366,9 @@ private fun DemoLazyColumnBusqueda(onBack: () -> Unit) {
         if (ordenarAsc) filtrados.sorted() else filtrados.sortedDescending()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("RecyclerView", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
-                    }
-                }
-            )
-        }
+    BaseScreen(
+        title = "RecyclerView (Busqueda)",
+        onBack = onBack
     ) { padding ->
         Column(
             modifier = Modifier
@@ -399,10 +390,10 @@ private fun DemoLazyColumnBusqueda(onBack: () -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = MaterialTheme.shapes.medium
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -412,24 +403,24 @@ private fun DemoLazyColumnBusqueda(onBack: () -> Unit) {
                 Text(
                     text = "Resultados: ${resultados.size} de ${todosLosElementos.size}",
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFF1A237E)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Orden:", fontSize = 13.sp)
+                    Text("Orden:", style = MaterialTheme.typography.bodySmall)
                     Switch(
                         checked = ordenarAsc,
                         onCheckedChange = { ordenarAsc = it },
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier.scale(0.8f).padding(horizontal = 4.dp)
                     )
                     Text(
                         if (ordenarAsc) "A-Z" else "Z-A",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (resultados.isEmpty()) {
                 Box(
@@ -437,20 +428,23 @@ private fun DemoLazyColumnBusqueda(onBack: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.SearchOff, null, modifier = Modifier.size(64.dp), tint = Color.LightGray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Sin resultados para '$busqueda'", color = Color.Gray)
+                        Icon(Icons.Default.SearchOff, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.outlineVariant)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Sin resultados para '$busqueda'", color = MaterialTheme.colorScheme.outline)
                     }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(resultados) { nombre ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = MaterialTheme.shapes.medium,
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
                         ) {
                             Row(
                                 modifier = Modifier.padding(14.dp),
